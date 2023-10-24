@@ -1,4 +1,4 @@
-import { ADD_BOOK, DELETE_BOOK } from './actionTypes';
+import { ADD_BOOK, DELETE_BOOK, TOGGLE_FAVORITE } from './actionTypes';
 
 export const addBook = (newBook) => ({
   type: ADD_BOOK,
@@ -7,5 +7,10 @@ export const addBook = (newBook) => ({
 
 export const deleteBook = (bookId) => ({
   type: DELETE_BOOK,
-  payload: bookId,
+  payload: bookId
+});
+
+export const toggleFavorite = (bookId) => ({
+  type: TOGGLE_FAVORITE,
+  payload: bookId
 })
