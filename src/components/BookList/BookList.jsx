@@ -1,5 +1,5 @@
-import { deleteBook, toggleFavorite } from '../../redux/books/actionCreators';
-import { selectAuthor, selectTitle } from '../../redux/slices/filterSlice';
+import { deleteBook, toggleFavorite } from '../../redux/slices/bookSlice';
+import { selectAuthor, selectFavorite, selectTitle } from '../../redux/slices/filterSlice';
 import './BookList.css';
 import { BsBookmarkHeart, BsBookmarkHeartFill } from "react-icons/bs";
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 export const BookList = () => {
   const querySearchTitle = useSelector(selectTitle);
   const querySearchAuthor = useSelector(selectAuthor);
-
+  const onlyFavorite = useSelector(selectFavorite);
   const books = useSelector((state) => state.books);
   const dispatch = useDispatch();
 
@@ -22,14 +22,44 @@ export const BookList = () => {
   const visibleBooks = books.filter((book) => {
     const preparedTitleQuery = querySearchTitle.toLowerCase();
     const preparedAuthorQuery = querySearchAuthor.toLowerCase();
-    
-    return book.title
+
+    const isTitleMatched = book.title
       .toLowerCase()
-      .includes(preparedTitleQuery) &&
-      book.author
-        .toLowerCase()
-        .includes(preparedAuthorQuery)
+      .includes(preparedTitleQuery);
+
+    const isAuthorMatched = book.author
+      .toLowerCase()
+      .includes(preparedAuthorQuery);
+
+    const isFavoriteBook = onlyFavorite
+      ? book.isFavorite
+      : true;
+
+    return isTitleMatched && isAuthorMatched && isFavoriteBook;
   });
+
+  const highlightSearchQuery = (text, query) => {
+    if (!query) {
+      return text
+    }
+    const regex = new RegExp(`(${query})`, 'gi');
+
+    return text.
+      split(regex)
+      .map((substr, i) => {
+        if (substr.toLowerCase() === query.toLowerCase()) {
+          return (
+            <span
+              key={i}
+              className='highlight'>
+              {substr}
+            </span>
+          )
+        }
+
+        return substr;
+      })
+  };
 
   return (
     <div className='app-block book-list'>
@@ -39,7 +69,16 @@ export const BookList = () => {
           {visibleBooks.map((book) => (
             <li key={book.id}>
               <div className='book-info'>
-                {book.title} by <strong>{book.title}</strong>
+                {highlightSearchQuery(
+                  book.title,
+                  querySearchTitle,
+                )} by {' '}
+                <strong>
+                  {highlightSearchQuery(
+                    book.author,
+                    querySearchAuthor,
+                  )}
+                </strong>
               </div>
               <div className='book-actions'>
                 <span
