@@ -1,4 +1,4 @@
-import { deleteBook, toggleFavorite } from '../../redux/slices/bookSlice';
+import { deleteBook, selectBooks, toggleFavorite } from '../../redux/slices/bookSlice';
 import { selectAuthor, selectFavorite, selectTitle } from '../../redux/slices/filterSlice';
 import './BookList.css';
 import { BsBookmarkHeart, BsBookmarkHeartFill } from "react-icons/bs";
@@ -8,8 +8,9 @@ export const BookList = () => {
   const querySearchTitle = useSelector(selectTitle);
   const querySearchAuthor = useSelector(selectAuthor);
   const onlyFavorite = useSelector(selectFavorite);
-  const books = useSelector((state) => state.books);
+  const books = useSelector(selectBooks);
   const dispatch = useDispatch();
+  console.log(books);
 
   const handleDeleteBook = (bookId) => {
     dispatch(deleteBook(bookId))

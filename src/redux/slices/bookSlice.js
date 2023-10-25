@@ -3,18 +3,23 @@ import axios from 'axios';
 import { createBook } from '../../utils/createBook';
 import { getRandomIndex } from '../../utils/getRandomIndex';
 
-const initialState = [];
+const initialState = {
+  books: [],
+  isLoading: false,
+  error: null
+};
 
 export const fetchBook = createAsyncThunk(
   'books/fetchBooks',
-  async () => {
+  async (_, thunkAPI) => {
     try {
       const { data } = await axios.get('https://65382ed7a543859d1bb14beb.mockapi.io/books');
       const index = getRandomIndex(data);
+      console.log(thunkAPI);
 
       return data[index];
     } catch (error) {
-      console.error(error)
+      throw new Error(error.message)
     }
   }
 )
@@ -24,13 +29,13 @@ export const bookSlice = createSlice({
   initialState,
   reducers: {
     addBook: (state, action) => {
-      state.push(action.payload)
+      state.books.push(action.payload)
     },
     deleteBook: (state, action) => {
-      return state.filter((book) => book.id !== action.payload)
+      state.books = state.books.filter((book) => book.id !== action.payload)
     },
     toggleFavorite: (state, action) => {
-      return state.map((book) => (
+      state.books = state.books.map((book) => (
         book.id === action.payload
           ? { ...book, isFavorite: !book.isFavorite }
           : book
@@ -39,10 +44,24 @@ export const bookSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchBook.fulfilled, (state, action) => {
-      state.push(createBook(action.payload))
+      state.books.push(createBook(action.payload))
+      state.isLoading = false;
+    });
+
+    builder.addCase(fetchBook.pending, (state) => {
+      state.isLoading = true;
+    });
+    
+    builder.addCase(fetchBook.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message
     })
-  }
+  },
 })
+
+export const selectBooks = (state) => state.books.books;
+export const selectIsLoading = (state) => state.books.isLoading;
+export const selectError = (state) => state.books.error;
 
 export const {
   addBook,

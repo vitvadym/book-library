@@ -1,15 +1,27 @@
 import { useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import './BookForm.css'
 import booksData from '../../data/books.json'
-import { addBook, fetchBook } from '../../redux/slices/bookSlice';
+import {
+  addBook,
+  fetchBook,
+  selectError,
+  selectIsLoading,
+} from '../../redux/slices/bookSlice';
 import { createBook } from '../../utils/createBook';
 import { getRandomIndex } from '../../utils/getRandomIndex';
+import { toast } from 'react-toastify';
+import { FaSpinner } from 'react-icons/fa';
+
+
 
 export const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
+
   const dispatch = useDispatch()
+  const error = useSelector(selectError);
+  const isLoading = useSelector(selectIsLoading)
 
   const handleChangeTitle = (event) => {
     setTitle(event.target.value)
@@ -39,8 +51,12 @@ export const BookForm = () => {
   };
 
   const fetchRandomBook = () => {
+    if (error) {
+      toast.error(error)
+    }
     dispatch(fetchBook())
-  }
+  };
+
   return (
     <div className='app-block book-form'>
       <h2>Add new book</h2>
@@ -79,8 +95,16 @@ export const BookForm = () => {
         </button>
         <button
           onClick={fetchRandomBook}
+          disabled={isLoading}
           type='button'>
-          Fetch random book
+          {isLoading
+            ? <>
+              <span>
+                Loading data...
+              </span>
+              <FaSpinner className='spinner' />
+            </>
+            : 'Fetch random book'}
         </button>
       </form>
     </div>
