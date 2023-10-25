@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import './BookForm.css'
 import booksData from '../../data/books.json'
-import { addBook } from '../../redux/slices/bookSlice';
+import { addBook, fetchBook } from '../../redux/slices/bookSlice';
 import { createBook } from '../../utils/createBook';
+import { getRandomIndex } from '../../utils/getRandomIndex';
 
 export const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
-  const dispath = useDispatch()
+  const dispatch = useDispatch()
 
   const handleChangeTitle = (event) => {
     setTitle(event.target.value)
@@ -23,7 +24,7 @@ export const BookForm = () => {
 
     if (title && author) {
       const book = createBook({ title, author });
-      dispath(addBook(book));
+      dispatch(addBook(book));
 
       setTitle('');
       setAuthor('');
@@ -31,13 +32,15 @@ export const BookForm = () => {
   };
 
   const handleAddRandomBook = () => {
-    const index = Math.floor(
-      Math.random() * booksData.length);
+    const index = getRandomIndex(booksData)
 
     const book = createBook(booksData[index]);
-    dispath(addBook(book));
+    dispatch(addBook(book));
   };
 
+  const fetchRandomBook = () => {
+    dispatch(fetchBook())
+  }
   return (
     <div className='app-block book-form'>
       <h2>Add new book</h2>
@@ -73,6 +76,11 @@ export const BookForm = () => {
           onClick={handleAddRandomBook}
           type='button'>
           Add random book
+        </button>
+        <button
+          onClick={fetchRandomBook}
+          type='button'>
+          Fetch random book
         </button>
       </form>
     </div>

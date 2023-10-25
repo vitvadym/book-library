@@ -1,9 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { createBook } from '../../utils/createBook';
+import { getRandomIndex } from '../../utils/getRandomIndex';
 
 const initialState = [];
 
+export const fetchBook = createAsyncThunk(
+  'books/fetchBooks',
+  async () => {
+    try {
+      const { data } = await axios.get('https://65382ed7a543859d1bb14beb.mockapi.io/books');
+      const index = getRandomIndex(data);
+
+      return data[index];
+    } catch (error) {
+      console.error(error)
+    }
+  }
+)
+
 export const bookSlice = createSlice({
-  name: 'book',
+  name: 'books',
   initialState,
   reducers: {
     addBook: (state, action) => {
@@ -19,6 +36,11 @@ export const bookSlice = createSlice({
           : book
       ))
     }
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchBook.fulfilled, (state, action) => {
+      state.push(createBook(action.payload))
+    })
   }
 })
 
